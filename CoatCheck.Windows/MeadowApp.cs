@@ -20,7 +20,7 @@ namespace CoatCheck.Windows
 
 			var displayController = new DisplayController(_display);
 
-			var model = new ViewModel(40, 39);
+			var model = new WeatherViewModel(40, 39);
 			displayController.Update(model);
 
 			return base.Initialize();
