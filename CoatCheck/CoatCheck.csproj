@@ -6,6 +6,37 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="cloudy_24.bmp" />
+    <None Remove="cloudy_64.bmp" />
+    <None Remove="dayclear_24.bmp" />
+    <None Remove="dayclear_64.bmp" />
+    <None Remove="nightclear_64.bmp" />
+    <None Remove="partlycloudy_24.bmp" />
+    <None Remove="partlycloudy_64.bmp" />
+    <None Remove="rain_24.bmp" />
+    <None Remove="rain_64.bmp" />
+    <None Remove="snow_24.bmp" />
+    <None Remove="snow_64.bmp" />
+    <None Remove="sun_64.bmp" />
+    <None Remove="thunderstorm_24.bmp" />
+    <None Remove="thunderstorm_64.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="cloudy_24.bmp" />
+    <EmbeddedResource Include="cloudy_64.bmp" />
+    <EmbeddedResource Include="dayclear_24.bmp" />
+    <EmbeddedResource Include="dayclear_64.bmp" />
+    <EmbeddedResource Include="nightclear_64.bmp" />
+    <EmbeddedResource Include="partlycloudy_24.bmp" />
+    <EmbeddedResource Include="partlycloudy_64.bmp" />
+    <EmbeddedResource Include="rain_24.bmp" />
+    <EmbeddedResource Include="rain_64.bmp" />
+    <EmbeddedResource Include="snow_24.bmp" />
+    <EmbeddedResource Include="snow_64.bmp" />
+    <EmbeddedResource Include="thunderstorm_24.bmp" />
+    <EmbeddedResource Include="thunderstorm_64.bmp" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Meadow.F7" Version="*" />
     <PackageReference Include="Meadow.Foundation" Version="*" />
     <PackageReference Include="Meadow.Foundation.Displays.TftSpi" Version="1.10.0" />
