@@ -33,7 +33,8 @@ namespace CoatCheck
 		{
 			_screen = new DisplayScreen(display)
 			{
-				// TODO Generate background color from temp
+				// TODO Generate background color from temp?
+				// We'll need new icons for that without the blending issues in the current ones
 				BackgroundColor = Color.White
 			};
 
@@ -128,12 +129,9 @@ namespace CoatCheck
 
 		Label CreateStatusLabel()
 		{
-			// TODO Make this a member so we only need it once
-			var font = new Font8x12();
-
-			var statusLabel = new Label(left: 5, top: _statusTop, width: _screen.Width - 5, height: font.Height + 2)
+			var statusLabel = new Label(left: 5, top: _statusTop, width: _screen.Width - 5, height: Text.Status.Height + 2)
 			{
-				Font = new Font8x12(),
+				Font = Text.Status,
 				TextColor = Color.White,
 				ScaleFactor = ScaleFactor.X1,
 				VerticalAlignment = VerticalAlignment.Top,

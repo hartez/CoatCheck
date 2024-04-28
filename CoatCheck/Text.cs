@@ -9,6 +9,8 @@ namespace CoatCheck
 		public static IFont Small { get; } = new CustomSmallFont();
 		public static IFont Tiny { get; } = new Font8x8();
 
+		public static IFont Status { get; } = new Font8x12();
+
 		public static Color DefaultColor { get; } = Color.Black;
 	}
 }
