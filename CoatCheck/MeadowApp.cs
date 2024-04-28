@@ -53,7 +53,7 @@ namespace CoatCheck
 
 			_displayController = new DisplayController(_display);
 
-			_weatherDataUrl = $"https://swd.weatherflow.com/swd/rest/observations/station/{_settings.StationId}?token={_settings.Token}";
+			_weatherDataUrl = $"https://swd.weatherflow.com/swd/rest/better_forecast?station_id={_settings.StationId}&token={_settings.Token}";
 
 			_sleepTimer = new System.Timers.Timer(TimeSpan.FromMinutes(_settings.SleepTimer).TotalMilliseconds)
 			{

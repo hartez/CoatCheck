@@ -4,12 +4,17 @@
 	{
 		public WeatherViewModel(StationData stationData)
 		{
-			var ob = stationData.obs[0];
+			var current = stationData.current_conditions;
 
-			Temp = ob.air_temperature.ToDisplay();
-			FeelsLike = ob.feels_like.ToDisplay();
+			Temp = current.air_temperature.ToDisplay();
+			FeelsLike = current.feels_like.ToDisplay();
 
-			CurrentCondition = WeatherCondition.Rain;
+			CurrentConditions = current.conditions;
+			CurrentIcon = current.icon;
+
+			Hour1 = stationData.forecast.hourly[0];
+			Hour2 = stationData.forecast.hourly[1];
+			Hour3 = stationData.forecast.hourly[2];
 		}
 
 		public WeatherViewModel(double airTemp, double feelsLike)
@@ -17,12 +22,20 @@
 			Temp = airTemp.ToDisplay();
 			FeelsLike = feelsLike.ToDisplay();
 
-			CurrentCondition = WeatherCondition.DayClear;
+			CurrentConditions = "Snow";
+			CurrentIcon = "snow";
+
+			Hour1 = new Hourly();
 		}
 
 		public string Temp { get; }
 		public string FeelsLike { get; }
 
-		public WeatherCondition CurrentCondition { get; }
+		public string CurrentConditions { get; }
+		public string CurrentIcon { get; }
+
+		public Hourly Hour1 { get; }
+		public Hourly Hour2 { get; }
+		public Hourly Hour3 { get; }
 	}
 }

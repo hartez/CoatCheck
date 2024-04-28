@@ -6,15 +6,15 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="clear-day_24.bmp" />
+    <None Remove="clear-day_64.bmp" />
+    <None Remove="clear-night_64.bmp" />
     <None Remove="cloudy_24.bmp" />
     <None Remove="cloudy_64.bmp" />
-    <None Remove="dayclear_24.bmp" />
-    <None Remove="dayclear_64.bmp" />
-    <None Remove="nightclear_64.bmp" />
-    <None Remove="partlycloudy_24.bmp" />
-    <None Remove="partlycloudy_64.bmp" />
-    <None Remove="rain_24.bmp" />
-    <None Remove="rain_64.bmp" />
+    <None Remove="partly-cloudy-day_24.bmp" />
+    <None Remove="partly-cloudy-day_64.bmp" />
+    <None Remove="rainy_24.bmp" />
+    <None Remove="rainy_64.bmp" />
     <None Remove="snow_24.bmp" />
     <None Remove="snow_64.bmp" />
     <None Remove="sun_64.bmp" />
@@ -24,13 +24,13 @@
   <ItemGroup>
     <EmbeddedResource Include="cloudy_24.bmp" />
     <EmbeddedResource Include="cloudy_64.bmp" />
-    <EmbeddedResource Include="dayclear_24.bmp" />
-    <EmbeddedResource Include="dayclear_64.bmp" />
-    <EmbeddedResource Include="nightclear_64.bmp" />
-    <EmbeddedResource Include="partlycloudy_24.bmp" />
-    <EmbeddedResource Include="partlycloudy_64.bmp" />
-    <EmbeddedResource Include="rain_24.bmp" />
-    <EmbeddedResource Include="rain_64.bmp" />
+    <EmbeddedResource Include="clear-day_24.bmp" />
+    <EmbeddedResource Include="clear-day_64.bmp" />
+    <EmbeddedResource Include="clear-night_64.bmp" />
+    <EmbeddedResource Include="partly-cloudy-day_24.bmp" />
+    <EmbeddedResource Include="partly-cloudy-day_64.bmp" />
+    <EmbeddedResource Include="rainy_24.bmp" />
+    <EmbeddedResource Include="rainy_64.bmp" />
     <EmbeddedResource Include="snow_24.bmp" />
     <EmbeddedResource Include="snow_64.bmp" />
     <EmbeddedResource Include="thunderstorm_24.bmp" />

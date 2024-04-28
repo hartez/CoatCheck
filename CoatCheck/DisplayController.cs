@@ -2,7 +2,6 @@
 using Meadow.Foundation.Graphics;
 using Meadow.Peripherals.Displays;
 using Meadow;
-using System.Runtime.CompilerServices;
 
 namespace CoatCheck
 {
@@ -11,17 +10,6 @@ namespace CoatCheck
 		None,
 		Status,
 		Weather
-	}
-
-	public enum WeatherCondition
-	{
-		DayClear,
-		NightClear,
-		Cloudy,
-		PartlyCloudy,
-		Rain,
-		Snow,
-		Thunderstorm
 	}
 
 	public class DisplayController
@@ -33,9 +21,11 @@ namespace CoatCheck
 		readonly Label _temp;
 		readonly Label _feelsLike;
 		readonly Picture _currentConditionsIcon;
+		readonly Label _currentConditionsLabel;
 
-		readonly IFont _bigFont = new Font12x20();
-		readonly IFont _smallFont = new CustomSmallFont();
+		readonly HourControl _hour1;
+		readonly HourControl _hour2;
+		readonly HourControl _hour3;
 
 		int _statusTop = 0;
 
@@ -43,65 +33,57 @@ namespace CoatCheck
 		{
 			_screen = new DisplayScreen(display)
 			{
-				BackgroundColor = Color.FromHex("14607F")
+				// TODO Generate background color from temp
+				BackgroundColor = Color.White
 			};
 
 			var rowHeight = _screen.Height / 3;
 			var screenWidth = _screen.Width;
 			int margin = 2;
 
-			Rect tempDest = MarginRect((screenWidth / 2), 0, (screenWidth / 2), rowHeight, margin);
-			Rect currentConditionsDest = MarginRect(0, 0, screenWidth / 2, rowHeight, 2);
-			Rect feelsLikeDest = MarginRect(0, rowHeight, screenWidth, rowHeight, 2);
+			Rect currentDest = MarginRect((screenWidth / 2), 0, (screenWidth / 2), rowHeight, marginLeft: 0, marginTop: margin, marginRight: margin, marginBottom: margin);
+			Rect currentConditionsIconDest = MarginRect(0, 0, screenWidth / 2, rowHeight, marginLeft: margin, marginTop: margin, marginRight: 0, marginBottom: margin);
+			Rect feelsLikeDest = MarginRect(0, rowHeight, screenWidth, rowHeight, margin);
 
-			_temp = new Label(tempDest.Left, tempDest.Top, tempDest.Width, tempDest.Height)
+			Rect hourlyDest = MarginRect(0, rowHeight * 2, screenWidth, rowHeight, margin);
+
+			_temp = new Label(currentDest.Left, currentDest.Top, currentDest.Width, (currentDest.Height / 2) - 1)
 			{
-				Font = _bigFont,
-				TextColor = Color.White,
+				Font = Text.Big,
+				TextColor = Text.DefaultColor,
 				ScaleFactor = ScaleFactor.X1,
-				VerticalAlignment = VerticalAlignment.Center,
+				VerticalAlignment = VerticalAlignment.Bottom,
 				HorizontalAlignment = HorizontalAlignment.Left
 			};
 
 			_feelsLike = new Label(feelsLikeDest.Left, feelsLikeDest.Top, width: feelsLikeDest.Width, feelsLikeDest.Height)
 			{
-				Font = _smallFont,
-				TextColor = Color.White,
+				Font = Text.Small,
+				TextColor = Text.DefaultColor,
 				ScaleFactor = ScaleFactor.X1,
 				VerticalAlignment = VerticalAlignment.Center,
 				HorizontalAlignment = HorizontalAlignment.Center
 			};
 
-			_currentConditionsIcon = new Picture(currentConditionsDest.Left, currentConditionsDest.Top, currentConditionsDest.Width, currentConditionsDest.Height)
+			_currentConditionsIcon = new Picture(currentConditionsIconDest.Left, currentConditionsIconDest.Top, currentConditionsIconDest.Width, currentConditionsIconDest.Height)
 			{
 				VerticalAlignment = VerticalAlignment.Center,
-				HorizontalAlignment = HorizontalAlignment.Right,
-				BackColor = _screen.BackgroundColor
+				HorizontalAlignment = HorizontalAlignment.Center,
+				BackColor = Color.Transparent
 			};
-		}
 
-		Rect MarginRect(int left, int top, int width, int height, int margin)
-		{
-			return new Rect(left + margin, top + margin, left + width - (2 * margin), top + height - (2 * margin));
-		}
-
-		Label CreateStatusLabel()
-		{
-			// TODO Make this a member so we only need it once
-			var font = new Font8x12();
-
-			var statusLabel = new Label(left: 5, top: _statusTop, width: _screen.Width - 5, height: font.Height + 2)
+			_currentConditionsLabel = new Label(currentDest.Left, currentDest.Top + 1 + currentDest.Height / 2, currentDest.Width, (currentDest.Height / 2))
 			{
-				Font = new Font8x12(),
-				TextColor = Color.White,
+				Font = Text.Small,
+				TextColor = Text.DefaultColor,
 				ScaleFactor = ScaleFactor.X1,
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Left
 			};
 
-			_statusTop += statusLabel.Height;
-
-			return statusLabel;
+			_hour1 = new HourControl(_screen.BackgroundColor, hourlyDest.Left, hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
+			_hour2 = new HourControl(_screen.BackgroundColor, hourlyDest.Left + hourlyDest.Width / 3, hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
+			_hour3 = new HourControl(_screen.BackgroundColor, hourlyDest.Left + (2 * hourlyDest.Width / 3), hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
 		}
 
 		public void Update(string status)
@@ -125,8 +107,42 @@ namespace CoatCheck
 
 			_temp.Text = model.Temp;
 			_feelsLike.Text = $"Feels like {model.FeelsLike}";
+			_currentConditionsLabel.Text = model.CurrentConditions;
 
-			UpdateCurrentConditionIcon(WeatherCondition.Cloudy);
+			UpdateCurrentConditionIcon(model.CurrentIcon);
+
+			_hour1.Update(model.Hour1);
+			_hour2.Update(model.Hour2);
+			_hour3.Update(model.Hour3);
+		}
+
+		Rect MarginRect(int left, int top, int width, int height, int margin)
+		{
+			return new Rect(left + margin, top + margin, left + width - (2 * margin), top + height - (2 * margin));
+		}
+
+		Rect MarginRect(int left, int top, int width, int height, int marginLeft, int marginTop, int marginRight, int marginBottom)
+		{
+			return new Rect(left + marginLeft, top + marginTop, left + width - (2 * marginRight), top + height - (2 * marginBottom));
+		}
+
+		Label CreateStatusLabel()
+		{
+			// TODO Make this a member so we only need it once
+			var font = new Font8x12();
+
+			var statusLabel = new Label(left: 5, top: _statusTop, width: _screen.Width - 5, height: font.Height + 2)
+			{
+				Font = new Font8x12(),
+				TextColor = Color.White,
+				ScaleFactor = ScaleFactor.X1,
+				VerticalAlignment = VerticalAlignment.Top,
+				HorizontalAlignment = HorizontalAlignment.Left
+			};
+
+			_statusTop += statusLabel.Height;
+
+			return statusLabel;
 		}
 
 		void UpdateDisplayMode(DisplayMode displayMode)
@@ -147,53 +163,19 @@ namespace CoatCheck
 				_screen.Controls.Add(_currentConditionsIcon);
 				_screen.Controls.Add(_temp);
 				_screen.Controls.Add(_feelsLike);
+				_screen.Controls.Add(_currentConditionsLabel);
+
+				_screen.Controls.Add(_hour1.Controls);
+				_screen.Controls.Add(_hour2.Controls);
+				_screen.Controls.Add(_hour3.Controls);
 			}
 
 			_mode = displayMode;
 		}
 
-		void UpdateCurrentConditionIcon(WeatherCondition condition)
+		void UpdateCurrentConditionIcon(string icon)
 		{
-			_currentConditionsIcon.Image = GetConditionImage(condition, 64);
-		}
-
-		void RecolorBackground(Image image, Color source, Color destination)
-		{
-			byte sourceByte = source.Color8bppRgb332;
-			var buffer = image.DisplayBuffer;
-
-			int width = image.Width;
-			int height = image.Height;
-
-			for (int x = 0; x < width; x++)
-			{
-				for (int y = 0; y < height; y++)
-				{
-					var pixel = buffer.GetPixel(x, y);
-					if (pixel.Color8bppRgb332 == sourceByte)
-					{
-						buffer.SetPixel(x, y, destination);
-					}
-				}
-			}
-		}
-
-		Image GetConditionImage(WeatherCondition condition, int size)
-		{
-			var name = GetImageResourceName(condition, size);
-			var image = Image.LoadFromResource(name);
-
-			// BMP is all that's supported, and BMP (here at least) doesn't support transparency.
-			// So the icon transparent backgrounds all end up solid black. We'll fake the transparency
-			// by replacing the black with the _screen background color.
-			RecolorBackground(image, Color.Black, _screen.BackgroundColor);
-
-			return image;
-		}
-
-		string GetImageResourceName(WeatherCondition condition, int size)
-		{
-			return $"CoatCheck.{condition.ToString().ToLower()}_{size}.bmp";
+			_currentConditionsIcon.Image = ConditionsIconHelpers.GetConditionImage(icon, 64, _screen.BackgroundColor);
 		}
 	}
 }
