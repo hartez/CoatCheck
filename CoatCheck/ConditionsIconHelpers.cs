@@ -34,6 +34,8 @@ namespace CoatCheck
 			// BMP is all that's supported, and the display doesn't support transparency.
 			// So we've made the icon transparent backgrounds all solid white. We'll fake the transparency
 			// by replacing the white with the specified background color (which we generally get from the DisplayScreen)
+
+			// Currently commenting this out until we get icons that work better with different backgrounds
 			//Recolor(image, Color.Black, backgroundColor);
 
 			return image;

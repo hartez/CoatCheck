@@ -2,6 +2,8 @@
 using Meadow.Foundation.Graphics;
 using Meadow.Peripherals.Displays;
 using Meadow;
+using System;
+using System.Globalization;
 
 namespace CoatCheck
 {
@@ -20,6 +22,8 @@ namespace CoatCheck
 
 		readonly Label _temp;
 		readonly Label _feelsLike;
+		readonly Label _comingUp;
+		readonly Label _lastUpdated;
 		readonly Picture _currentConditionsIcon;
 		readonly Label _currentConditionsLabel;
 
@@ -29,13 +33,16 @@ namespace CoatCheck
 
 		int _statusTop = 0;
 
+		Color _statusScreenColor = Color.Black;
+		Color _weatherScreenColor = Color.White;
+
 		public DisplayController(IPixelDisplay display)
 		{
 			_screen = new DisplayScreen(display)
 			{
 				// TODO Generate background color from temp?
 				// We'll need new icons for that without the blending issues in the current ones
-				BackgroundColor = Color.White
+				//BackgroundColor = Color.White
 			};
 
 			var rowHeight = _screen.Height / 3;
@@ -48,12 +55,12 @@ namespace CoatCheck
 
 			Rect hourlyDest = MarginRect(0, rowHeight * 2, screenWidth, rowHeight, margin);
 
-			_temp = new Label(currentDest.Left, currentDest.Top, currentDest.Width, (currentDest.Height / 2) - 1)
+			_temp = new Label(currentDest.Left, currentDest.Top + 10, currentDest.Width, (currentDest.Height / 2) - 1)
 			{
 				Font = Text.Big,
 				TextColor = Text.DefaultColor,
-				ScaleFactor = ScaleFactor.X1,
-				VerticalAlignment = VerticalAlignment.Bottom,
+				ScaleFactor = ScaleFactor.X2,
+				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Left
 			};
 
@@ -62,8 +69,28 @@ namespace CoatCheck
 				Font = Text.Small,
 				TextColor = Text.DefaultColor,
 				ScaleFactor = ScaleFactor.X1,
-				VerticalAlignment = VerticalAlignment.Center,
+				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Center
+			};
+
+			_comingUp = new Label(feelsLikeDest.Left, feelsLikeDest.Top, width: feelsLikeDest.Width, feelsLikeDest.Height)
+			{
+				Font = Text.Small,
+				TextColor = Text.DefaultColor,
+				ScaleFactor = ScaleFactor.X1,
+				VerticalAlignment = VerticalAlignment.Bottom,
+				HorizontalAlignment = HorizontalAlignment.Center,
+				Text = "Coming up:"
+			};
+
+			_lastUpdated = new Label(feelsLikeDest.Left, feelsLikeDest.Top, width: feelsLikeDest.Width, feelsLikeDest.Height)
+			{
+				Font = Text.Small,
+				TextColor = Text.DefaultColor,
+				ScaleFactor = ScaleFactor.X1,
+				VerticalAlignment = VerticalAlignment.Center,
+				HorizontalAlignment = HorizontalAlignment.Center,
+				Text = "Coming up:"
 			};
 
 			_currentConditionsIcon = new Picture(currentConditionsIconDest.Left, currentConditionsIconDest.Top, currentConditionsIconDest.Width, currentConditionsIconDest.Height)
@@ -73,7 +100,7 @@ namespace CoatCheck
 				BackColor = Color.Transparent
 			};
 
-			_currentConditionsLabel = new Label(currentDest.Left, currentDest.Top + 1 + currentDest.Height / 2, currentDest.Width, (currentDest.Height / 2))
+			_currentConditionsLabel = new Label(currentDest.Left, currentDest.Top + 10 + currentDest.Height / 2, currentDest.Width, (currentDest.Height / 2))
 			{
 				Font = Text.Small,
 				TextColor = Text.DefaultColor,
@@ -82,19 +109,14 @@ namespace CoatCheck
 				HorizontalAlignment = HorizontalAlignment.Left
 			};
 
-			_hour1 = new HourControl(_screen.BackgroundColor, hourlyDest.Left, hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
-			_hour2 = new HourControl(_screen.BackgroundColor, hourlyDest.Left + hourlyDest.Width / 3, hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
-			_hour3 = new HourControl(_screen.BackgroundColor, hourlyDest.Left + (2 * hourlyDest.Width / 3), hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
+			_hour1 = new HourControl(_weatherScreenColor, hourlyDest.Left, hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
+			_hour2 = new HourControl(_weatherScreenColor, hourlyDest.Left + hourlyDest.Width / 3, hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
+			_hour3 = new HourControl(_weatherScreenColor, hourlyDest.Left + (2 * hourlyDest.Width / 3), hourlyDest.Top, hourlyDest.Width / 3, hourlyDest.Height);
 		}
 
 		public void Update(string status)
 		{
-			if (_mode != DisplayMode.Status)
-			{
-				_mode = DisplayMode.Status;
-				_screen.Controls.Clear();
-				_statusTop = 2;
-			}
+			UpdateDisplayMode(DisplayMode.Status);
 
 			var statusLabel = CreateStatusLabel();
 			_screen.Controls.Add(statusLabel);
@@ -106,8 +128,11 @@ namespace CoatCheck
 		{
 			UpdateDisplayMode(DisplayMode.Weather);
 
+			_screen.BeginUpdate();
+
 			_temp.Text = model.Temp;
 			_feelsLike.Text = $"Feels like {model.FeelsLike}";
+			_lastUpdated.Text = $"Last updated: {DateTime.Now:hh:mm tt}";
 			_currentConditionsLabel.Text = model.CurrentConditions;
 
 			UpdateCurrentConditionIcon(model.CurrentIcon);
@@ -115,6 +140,11 @@ namespace CoatCheck
 			_hour1.Update(model.Hour1);
 			_hour2.Update(model.Hour2);
 			_hour3.Update(model.Hour3);
+
+			_screen.EndUpdate();
+
+			// TODO This update is not working when the screen is off
+			// so maybe need to keep the last model and hit the update method when the screen comes back on?
 		}
 
 		Rect MarginRect(int left, int top, int width, int height, int margin)
@@ -155,12 +185,16 @@ namespace CoatCheck
 			if (displayMode == DisplayMode.Status)
 			{
 				_statusTop = 2;
+				_screen.BackgroundColor = _statusScreenColor;
 			}
 			else if (displayMode == DisplayMode.Weather)
 			{
+				_screen.BackgroundColor = _weatherScreenColor;
 				_screen.Controls.Add(_currentConditionsIcon);
 				_screen.Controls.Add(_temp);
 				_screen.Controls.Add(_feelsLike);
+				_screen.Controls.Add(_lastUpdated);
+				_screen.Controls.Add(_comingUp);
 				_screen.Controls.Add(_currentConditionsLabel);
 
 				_screen.Controls.Add(_hour1.Controls);

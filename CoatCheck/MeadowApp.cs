@@ -25,7 +25,7 @@ namespace CoatCheck
 		System.Timers.Timer _weatherUpdateTimer;
 		System.Timers.Timer _sleepTimer;
 
-		public override Task Initialize()
+		public override async Task Initialize()
 		{
 			Info("Initialize...");
 
@@ -55,6 +55,8 @@ namespace CoatCheck
 
 			_weatherDataUrl = $"https://swd.weatherflow.com/swd/rest/better_forecast?station_id={_settings.StationId}&token={_settings.Token}";
 
+			await SetupNetwork();
+
 			_sleepTimer = new System.Timers.Timer(TimeSpan.FromMinutes(_settings.SleepTimer).TotalMilliseconds)
 			{
 				AutoReset = false
@@ -83,9 +85,7 @@ namespace CoatCheck
 				Resolver.Log.Info($"Sleep/wake button pushed, status should now be {(_display.IsAwake ? "awake" : "asleep")}");
 			};
 
-			ConnectToNetwork();
-
-			return base.Initialize();
+			await base.Initialize();
 		}
 
 		public override Task Run()
@@ -108,6 +108,24 @@ namespace CoatCheck
 			};
 			
 			_weatherUpdateTimer.Start();
+			return Task.CompletedTask;
+		}
+
+		Task UpdateClock()
+		{
+			var now = DateTime.Now;
+						
+			// The device doesn't know about all the time zones and such, so we'll have to create our own custom time zone
+			// To get local times for the display.
+
+			// TODO  We'll fix up the transition rules later
+			var zone = TimeZoneInfo.CreateCustomTimeZone("MDT", new TimeSpan(-6, 0, 0), "Mountain Time", "Mountain Standard Time", "Mountain Daylight Time", new TimeZoneInfo.AdjustmentRule[0], true);
+			var local = TimeZoneInfo.ConvertTime(now, zone);
+
+			_displayController?.Update($"Setting clock to {local}");
+
+			Device.PlatformOS.SetClock(local);
+
 			return Task.CompletedTask;
 		}
 
@@ -135,18 +153,43 @@ namespace CoatCheck
 			Resolver.Log.Info($"{DateTime.Now.ToLocalTime()}: {message}");
 		}
 
-		private void ConnectToNetwork()
+		private async Task SetupNetwork()
 		{
 			var wifi = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
 
-			_displayController.Update($"Connecting to {wifi.DefaultSsid}");
-
-			Info($"Registering for network events, connecting to {wifi.DefaultSsid}");
+			Info($"Registering for network events");
 
 			wifi.NetworkError += NetworkError;
 			wifi.NetworkConnected += NetworkConnected;
+			wifi.NetworkDisconnected += NetworkDisconnected;
+			
+			if(wifi.IsConnected)
+			{
+				_displayController.Update($"Connected to {wifi.DefaultSsid}");
+				_wifiConnected = true;
+				await UpdateClock();
+				await UpdateWeatherData();
+			}
+			else
+			{
+				_displayController.Update($"Connecting to {wifi.DefaultSsid}");
+				
+				try
+				{ 
+					wifi.ConnectToDefaultAccessPoint();
+				}
+				catch(Exception ex)
+				{
+					Resolver.Log.Error($"Network Error: {ex}");
+				}
+			}
+		}
 
-			wifi.ConnectToDefaultAccessPoint();
+		private void NetworkDisconnected(INetworkAdapter sender, NetworkDisconnectionEventArgs args)
+		{
+			_wifiConnected = true;
+			// TODO We need to figure out how the auto reconnect works, and whether to display status updates when this happens
+			// we can test it by setting it up on the phone hotspot
 		}
 
 		private async void NetworkConnected(INetworkAdapter networkAdapter, NetworkConnectionEventArgs args)
@@ -159,6 +202,7 @@ namespace CoatCheck
 			_displayController.Update($"Connected!");
 			_displayController.Update($"Checking the weather...");
 
+			await UpdateClock();
 			await UpdateWeatherData();
 
 			_wifiConnected = true;

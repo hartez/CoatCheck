@@ -7,16 +7,17 @@ namespace CoatCheck
 	class HourControl
 	{
 		readonly Label _hour;
-		readonly Label _conditions;
+		readonly Label _conditions0;
+		readonly Label _conditions1;
 		readonly Label _temp;
 		readonly Picture _icon;
 		readonly Color _backgroundColor;
 
-		public IControl[] Controls { get; } = new IControl[4];
+		public IControl[] Controls { get; } = new IControl[5];
 
 		public HourControl(Color backgroundColor, int left, int top, int width, int height)
 		{
-			Controls[0] = _hour = new Label(left, top, width, (height / 3))
+			Controls[0] = _hour = new Label(left, top, width, (height / 4))
 			{
 				VerticalAlignment = VerticalAlignment.Center,
 				HorizontalAlignment = HorizontalAlignment.Center,
@@ -24,7 +25,7 @@ namespace CoatCheck
 				TextColor = Text.DefaultColor
 			};
 
-			Controls[1] = _temp = new Label(left + (width / 2), top + (height / 3), (width / 2), (height / 3))
+			Controls[1] = _temp = new Label(left + (width / 2), top + (height / 4), (width / 2), (height / 4))
 			{
 				VerticalAlignment = VerticalAlignment.Center,
 				HorizontalAlignment = HorizontalAlignment.Left,
@@ -32,14 +33,22 @@ namespace CoatCheck
 				TextColor = Text.DefaultColor
 			};
 
-			Controls[2] = _icon = new Picture(left, top + (height / 3), (width / 2), (height / 3))
+			Controls[2] = _icon = new Picture(left, top + (height / 4), (width / 2), (height / 4))
 			{
 				VerticalAlignment = VerticalAlignment.Center,
 				HorizontalAlignment = HorizontalAlignment.Center,
 				BackColor = backgroundColor,
 			};
 
-			Controls[3] = _conditions = new Label(left, top + (2 * height / 3), width, (height / 3))
+			Controls[3] = _conditions0 = new Label(left, top + (2 * height / 4), width, (height / 4))
+			{
+				VerticalAlignment = VerticalAlignment.Center,
+				HorizontalAlignment = HorizontalAlignment.Center,
+				Font = Text.Tiny,
+				TextColor = Text.DefaultColor
+			};
+
+			Controls[4] = _conditions1 = new Label(left, top + (3 * height / 4), width, (height / 4))
 			{
 				VerticalAlignment = VerticalAlignment.Center,
 				HorizontalAlignment = HorizontalAlignment.Center,
@@ -54,7 +63,12 @@ namespace CoatCheck
 		{
 			_hour.Text = hourly.ToHourDisplay();
 			_temp.Text = hourly.air_temperature.ToDisplay();
-			_conditions.Text = hourly.conditions.ToShortCondition();
+
+			var conditionLines = hourly.conditions.Split(" ");
+
+			_conditions0.Text = conditionLines[0];
+
+			_conditions1.Text = conditionLines.Length > 1 ? conditionLines[1] : "";
 
 			_icon.Image = ConditionsIconHelpers.GetConditionImage(hourly.icon, 24, _backgroundColor);
 		}
