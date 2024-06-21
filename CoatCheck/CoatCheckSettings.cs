@@ -2,11 +2,29 @@
 
 namespace CoatCheck
 {
-	public class CoatCheckSettings : ConfigurableObject
+	public class CoatCheckSettings
 	{
-		public string Token => GetConfiguredString(nameof(Token));
-		public string StationId => GetConfiguredString(nameof(StationId));
-		public int UpdateInterval => GetConfiguredInt(nameof(UpdateInterval));
-		public int SleepTimer => GetConfiguredInt(nameof(SleepTimer));
+		public CoatCheckSettings(IApp app)
+		{
+			Token = GetString(app, nameof(Token));
+			StationId = GetString(app, nameof(StationId));
+			UpdateInterval = GetInt(app, nameof(UpdateInterval));
+			SleepTimer = GetInt(app, nameof(SleepTimer));
+		}
+
+		static string GetString(IApp app, string name)
+		{
+			return app.Settings[$"CoatCheck.{name}"];
+		}
+
+		static int GetInt(IApp app, string name)
+		{
+			return int.Parse(GetString(app, name));
+		}
+
+		public string Token { get; }
+		public string StationId { get; }
+		public int UpdateInterval { get; }
+		public int SleepTimer { get; }
 	}
 }

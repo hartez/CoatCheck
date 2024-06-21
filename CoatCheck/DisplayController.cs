@@ -3,7 +3,6 @@ using Meadow.Foundation.Graphics;
 using Meadow.Peripherals.Displays;
 using Meadow;
 using System;
-using System.Globalization;
 
 namespace CoatCheck
 {
@@ -126,12 +125,15 @@ namespace CoatCheck
 
 		public void Update(WeatherViewModel model)
 		{
+			Resolver.Log.Info($"{DateTime.Now.ToLocalTime()}: Updating display");
+
 			UpdateDisplayMode(DisplayMode.Weather);
 
 			_screen.BeginUpdate();
 
 			_temp.Text = model.Temp;
 			_feelsLike.Text = $"Feels like {model.FeelsLike}";
+
 			_lastUpdated.Text = $"Last updated: {DateTime.Now:hh:mm tt}";
 			_currentConditionsLabel.Text = model.CurrentConditions;
 
@@ -142,9 +144,6 @@ namespace CoatCheck
 			_hour3.Update(model.Hour3);
 
 			_screen.EndUpdate();
-
-			// TODO This update is not working when the screen is off
-			// so maybe need to keep the last model and hit the update method when the screen comes back on?
 		}
 
 		Rect MarginRect(int left, int top, int width, int height, int margin)
