@@ -125,7 +125,9 @@ namespace CoatCheck
 
 		public void Update(WeatherViewModel model)
 		{
-			Resolver.Log.Info($"{DateTime.Now.ToLocalTime()}: Updating display");
+			var now = DateTime.Now.ToLocalTime();
+
+			Resolver.Log.Info($"{now}: Updating display");
 
 			UpdateDisplayMode(DisplayMode.Weather);
 
@@ -134,7 +136,7 @@ namespace CoatCheck
 			_temp.Text = model.Temp;
 			_feelsLike.Text = $"Feels like {model.FeelsLike}";
 
-			_lastUpdated.Text = $"Last updated: {DateTime.Now:hh:mm tt}";
+			_lastUpdated.Text = $"Last updated: {now:hh:mm tt}";
 			_currentConditionsLabel.Text = model.CurrentConditions;
 
 			UpdateCurrentConditionIcon(model.CurrentIcon);

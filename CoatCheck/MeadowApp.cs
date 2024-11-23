@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Timers;
 using Meadow.Foundation.Sensors.Motion;
+using Meadow.Gateways.Bluetooth;
 
 namespace CoatCheck
 {
@@ -75,7 +76,7 @@ namespace CoatCheck
 
 			parallaxPir.OnMotionStart += (sender) => 
 			{
-				LogInfo($"Motion detected, status is {(_display.IsAwake ? "awake" : "asleep")}");
+				//LogInfo($"Motion detected, status is {(_display.IsAwake ? "awake" : "asleep")}");
 				_sleepTimer.Stop();
 				
 				if(!_display.IsAwake)
@@ -83,23 +84,31 @@ namespace CoatCheck
 					_display.Wake();
 				}
 				
-				LogInfo($"Woken up because motion detected, status should now be {(_display.IsAwake ? "awake" : "asleep")}");
+				//LogInfo($"Woken up because motion detected, status should now be {(_display.IsAwake ? "awake" : "asleep")}");
 			};
 
 			parallaxPir.OnMotionEnd += (sender) => 
 			{
-				LogInfo($"Motion ended, enabling the sleep timer...");
+				//LogInfo($"Motion ended, enabling the sleep timer...");
 				_sleepTimer.Start();
 			};
 
 			if (_wifi.IsConnected)
 			{
 				DisplayStatus($"Connected to {_wifi.DefaultSsid}");
-				EnsureClockSet();
+				AdjustClock();
 				await UpdateWeatherData();
 			}
 
+			Device.PlatformOS.NtpClient.TimeChanged += TimeSynced;
+
 			await base.Initialize();
+		}
+
+		private void TimeSynced(DateTime utcTime)
+		{
+			LogInfo($"NTP Client updated time to {DateTime.Now} (locally {DateTime.Now.ToLocalTime()})");
+			AdjustClock(true);
 		}
 
 		public override Task Run()
@@ -126,25 +135,29 @@ namespace CoatCheck
 			return Task.CompletedTask;
 		}
 
-		void EnsureClockSet()
+		void AdjustClock(bool ntpUpdate = false)
 		{
-			if(_isClockSet)
+			if (_isClockSet && !ntpUpdate)
 			{
 				return;
 			}
 
 			var now = DateTime.Now;
-						
+			
 			// The device doesn't know about all the time zones and such, so we'll have to create our own custom time zone
 			// To get local times for the display.
 
 			LogInfo($"Device current time is {now}, converting to Mountain...");
 
 			// TODO  We'll fix up the transition rules later
+			// TODO Make this static, no reason to allocate more than one
 			var zone = TimeZoneInfo.CreateCustomTimeZone("MDT", new TimeSpan(-6, 0, 0), "Mountain Time", "Mountain Standard Time", "Mountain Daylight Time", new TimeZoneInfo.AdjustmentRule[0], true);
 			var local = TimeZoneInfo.ConvertTime(now, zone);
 
-			DisplayStatus($"Setting clock to {local:h:mm tt}");
+			if(!ntpUpdate)
+			{ 
+				DisplayStatus($"Setting clock to {local:h:mm tt}");
+			}
 
 			Device.PlatformOS.SetClock(local);
 			_isClockSet = true;
@@ -185,7 +198,7 @@ namespace CoatCheck
 			DisplayStatus($"Subnet mask: {networkAdapter.SubnetMask}");
 			DisplayStatus($"Gateway: {networkAdapter.Gateway}");
 
-			EnsureClockSet();
+			AdjustClock();
 
 			DisplayStatus($"Checking the weather...");
 			await UpdateWeatherData();

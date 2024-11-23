@@ -8,6 +8,7 @@
   <ItemGroup>
     <None Remove="clear-day_24.bmp" />
     <None Remove="clear-day_64.bmp" />
+    <None Remove="clear-night_24.bmp" />
     <None Remove="clear-night_64.bmp" />
     <None Remove="cloudy_24.bmp" />
     <None Remove="cloudy_64.bmp" />
@@ -22,6 +23,7 @@
     <None Remove="thunderstorm_64.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="clear-night_24.bmp" />
     <EmbeddedResource Include="cloudy_24.bmp" />
     <EmbeddedResource Include="cloudy_64.bmp" />
     <EmbeddedResource Include="clear-day_24.bmp" />
@@ -39,10 +41,10 @@
   <ItemGroup>
     <PackageReference Include="Meadow.F7" Version="*" />
     <PackageReference Include="Meadow.Foundation" Version="*" />
-    <PackageReference Include="Meadow.Foundation.Displays.TftSpi" Version="1.12.2" />
-    <PackageReference Include="Meadow.Foundation.Graphics.MicroLayout" Version="1.12.2" />
-    <PackageReference Include="Meadow.Foundation.Sensors.Motion.ParallaxPir" Version="1.12.2" />
-    <PackageReference Include="System.Text.Json" Version="7.0.0" />
+    <PackageReference Include="Meadow.Foundation.Displays.TftSpi" Version="1.15.0" />
+    <PackageReference Include="Meadow.Foundation.Graphics.MicroLayout" Version="1.15.0" />
+    <PackageReference Include="Meadow.Foundation.Sensors.Motion.ParallaxPir" Version="1.15.0" />
+    <PackageReference Include="System.Text.Json" Version="7.0.4" />
   </ItemGroup>
   <ItemGroup>
     <None Include="meadow.config.yaml">

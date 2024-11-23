@@ -1,4 +1,5 @@
 using CoatCheck;
+using Meadow.Peripherals.Leds;
 
 namespace CoatCheck.Tests
 {
@@ -4438,13 +4439,60 @@ namespace CoatCheck.Tests
 			Assert.Equal(expected, displayTemp);
 		}
 
-        [Fact]
+		[Fact]
 		public void FormatHourlyHour()
 		{
 			var data = StationData.Parse(SampleData);
 			var hourly = data.forecast.hourly[0];
-			
-            Assert.Equal("6 PM", hourly.ToHourDisplay());
+
+			Assert.Equal("6 PM", hourly.ToHourDisplay());
+		}
+	}
+
+	public class ConditionsIconsTests
+	{
+		[Theory]
+		[InlineData("clear-day", 24)]
+		[InlineData("clear-day", 64)]
+		[InlineData("clear-night", 24)]
+		[InlineData("clear-night", 64)]
+		[InlineData("cloudy", 24)]
+		[InlineData("cloudy", 64)]
+		[InlineData("rainy", 24)]
+		[InlineData("rainy", 64)]
+		[InlineData("snow", 24)]
+		[InlineData("snow", 64)]
+		[InlineData("thunderstorm", 24)]
+		[InlineData("thunderstorm", 64)]
+		[InlineData("partly-cloudy-day", 24)]
+		[InlineData("partly-cloudy-day", 64)]
+		[InlineData("sleet", 24)]
+		[InlineData("sleet", 64)]
+		[InlineData("rainy-day", 24)]
+		[InlineData("rainy-day", 64)]
+		[InlineData("rainy-night", 24)]
+		[InlineData("rainy-night", 64)]
+		[InlineData("sleet-day", 24)]
+		[InlineData("sleet-day", 64)]
+		[InlineData("sleet-night", 24)]
+		[InlineData("sleet-night", 64)]
+		[InlineData("partly-cloudy-night", 24)]
+		[InlineData("partly-cloudy-night", 64)]
+		[InlineData("windy", 24)]
+		[InlineData("windy", 64)]
+		[InlineData("foggy", 24)]
+		[InlineData("foggy", 64)]
+		[InlineData("snow-day", 24)]
+		[InlineData("snow-day", 64)]
+		[InlineData("snow-night", 24)]
+		[InlineData("snow-night", 64)]
+		[InlineData("thunderstorm-day", 24)]
+		[InlineData("thunderstorm-day", 64)]
+		[InlineData("thunderstorm-night", 24)]
+		[InlineData("thunderstorm-night", 64)]
+		public void LoadingConditionsIconDoesNotThrow(string icon, int size)
+		{
+			var image = ConditionsIconHelpers.GetConditionImage(icon, size, Meadow.Color.Red);
 		}
 	}
 }
