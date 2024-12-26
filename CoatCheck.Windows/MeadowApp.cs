@@ -20,13 +20,9 @@ namespace CoatCheck.Windows
 
 			var displayController = new DisplayController(_display);
 
-			var sd = StationData.Parse(SampleData);
+			var sampleData = StationData.Parse(SampleData);
 			
-			var model =
-                //new WeatherViewModel(40, 39);
-                new WeatherViewModel(sd);
-
-			displayController.Update(model);
+			displayController.Update(sampleData);
 
 			return base.Initialize();
 		}

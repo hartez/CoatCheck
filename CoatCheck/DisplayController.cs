@@ -37,24 +37,19 @@ namespace CoatCheck
 
 		public DisplayController(IPixelDisplay display)
 		{
-			_screen = new DisplayScreen(display)
-			{
-				// TODO Generate background color from temp?
-				// We'll need new icons for that without the blending issues in the current ones
-				//BackgroundColor = Color.White
-			};
+			_screen = new DisplayScreen(display);
 
 			var rowHeight = _screen.Height / 3;
 			var screenWidth = _screen.Width;
 			int margin = 2;
+			int currentConditionsMarginTop = 10;
 
 			Rect currentDest = MarginRect((screenWidth / 2), 0, (screenWidth / 2), rowHeight, marginLeft: 0, marginTop: margin, marginRight: margin, marginBottom: margin);
 			Rect currentConditionsIconDest = MarginRect(0, 0, screenWidth / 2, rowHeight, marginLeft: margin, marginTop: margin, marginRight: 0, marginBottom: margin);
 			Rect feelsLikeDest = MarginRect(0, rowHeight, screenWidth, rowHeight, margin);
-
 			Rect hourlyDest = MarginRect(0, rowHeight * 2, screenWidth, rowHeight, margin);
 
-			_temp = new Label(currentDest.Left, currentDest.Top + 10, currentDest.Width, (currentDest.Height / 2) - 1)
+			_temp = new Label(currentDest.Left, currentDest.Top + currentConditionsMarginTop, currentDest.Width, (currentDest.Height / 2) - 1)
 			{
 				Font = Text.Big,
 				TextColor = Text.DefaultColor,
@@ -63,7 +58,7 @@ namespace CoatCheck
 				HorizontalAlignment = HorizontalAlignment.Left
 			};
 
-			_feelsLike = new Label(feelsLikeDest.Left, feelsLikeDest.Top, width: feelsLikeDest.Width, feelsLikeDest.Height)
+			_feelsLike = new Label(feelsLikeDest.Left, feelsLikeDest.Top, feelsLikeDest.Width, feelsLikeDest.Height)
 			{
 				Font = Text.Small,
 				TextColor = Text.DefaultColor,
@@ -72,7 +67,7 @@ namespace CoatCheck
 				HorizontalAlignment = HorizontalAlignment.Center
 			};
 
-			_comingUp = new Label(feelsLikeDest.Left, feelsLikeDest.Top, width: feelsLikeDest.Width, feelsLikeDest.Height)
+			_comingUp = new Label(feelsLikeDest.Left, feelsLikeDest.Top, feelsLikeDest.Width, feelsLikeDest.Height)
 			{
 				Font = Text.Small,
 				TextColor = Text.DefaultColor,
@@ -82,7 +77,7 @@ namespace CoatCheck
 				Text = "Coming up:"
 			};
 
-			_lastUpdated = new Label(feelsLikeDest.Left, feelsLikeDest.Top, width: feelsLikeDest.Width, feelsLikeDest.Height)
+			_lastUpdated = new Label(feelsLikeDest.Left, feelsLikeDest.Top, feelsLikeDest.Width, feelsLikeDest.Height)
 			{
 				Font = Text.Small,
 				TextColor = Text.DefaultColor,
@@ -99,7 +94,7 @@ namespace CoatCheck
 				BackColor = Color.Transparent
 			};
 
-			_currentConditionsLabel = new Label(currentDest.Left, currentDest.Top + 10 + currentDest.Height / 2, currentDest.Width, (currentDest.Height / 2))
+			_currentConditionsLabel = new Label(currentDest.Left, currentDest.Top + currentConditionsMarginTop + currentDest.Height / 2, currentDest.Width, (currentDest.Height / 2))
 			{
 				Font = Text.Small,
 				TextColor = Text.DefaultColor,
@@ -123,8 +118,10 @@ namespace CoatCheck
 			statusLabel.Text = status;
 		}
 
-		public void Update(WeatherViewModel model)
+		public void Update(StationData model)
 		{
+			var current = model.current_conditions;
+
 			var now = DateTime.Now.ToLocalTime();
 
 			Resolver.Log.Info($"{now}: Updating display");
@@ -133,17 +130,17 @@ namespace CoatCheck
 
 			_screen.BeginUpdate();
 
-			_temp.Text = model.Temp;
-			_feelsLike.Text = $"Feels like {model.FeelsLike}";
+			_temp.Text = current.air_temperature.ToDisplay();
+			_feelsLike.Text = $"Feels like {current.feels_like.ToDisplay()}";
 
 			_lastUpdated.Text = $"Last updated: {now:hh:mm tt}";
-			_currentConditionsLabel.Text = model.CurrentConditions;
+			_currentConditionsLabel.Text = current.conditions;
 
-			UpdateCurrentConditionIcon(model.CurrentIcon);
+			UpdateCurrentConditionIcon(current.icon);
 
-			_hour1.Update(model.Hour1);
-			_hour2.Update(model.Hour2);
-			_hour3.Update(model.Hour3);
+			_hour1.Update(model.forecast.hourly[0]);
+			_hour2.Update(model.forecast.hourly[1]);
+			_hour3.Update(model.forecast.hourly[2]);
 
 			_screen.EndUpdate();
 		}
@@ -160,7 +157,10 @@ namespace CoatCheck
 
 		Label CreateStatusLabel()
 		{
-			var statusLabel = new Label(left: 5, top: _statusTop, width: _screen.Width - 5, height: Text.Status.Height + 2)
+			int statusLabelMargin = 5;
+			int statusLabelPadding = 2;
+
+			var statusLabel = new Label(left: statusLabelMargin, top: _statusTop, width: _screen.Width - statusLabelMargin, height: Text.Status.Height + statusLabelPadding)
 			{
 				Font = Text.Status,
 				TextColor = Color.White,
@@ -208,7 +208,7 @@ namespace CoatCheck
 
 		void UpdateCurrentConditionIcon(string icon)
 		{
-			_currentConditionsIcon.Image = ConditionsIconHelpers.GetConditionImage(icon, 64, _screen.BackgroundColor);
+			_currentConditionsIcon.Image = ConditionsIconHelpers.GetConditionIconLarge(icon, _screen.BackgroundColor);
 		}
 	}
 }

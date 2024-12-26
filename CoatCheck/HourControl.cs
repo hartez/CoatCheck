@@ -70,7 +70,7 @@ namespace CoatCheck
 
 			_conditions1.Text = conditionLines.Length > 1 ? conditionLines[1] : "";
 
-			_icon.Image = ConditionsIconHelpers.GetConditionImage(hourly.icon, 24, _backgroundColor);
+			_icon.Image = ConditionsIconHelpers.GetConditionIconSmall(hourly.icon, _backgroundColor);
 		}
 	}
 }

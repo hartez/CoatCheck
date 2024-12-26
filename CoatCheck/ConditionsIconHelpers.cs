@@ -26,7 +26,17 @@ namespace CoatCheck
 			}
 		}
 
-		public static Image GetConditionImage(string icon, int size, Color backgroundColor)
+		public static Image GetConditionIconSmall(string icon, Color backgroundColor)
+		{
+			return GetConditionIcon(icon, 24, backgroundColor);
+		}
+
+		public static Image GetConditionIconLarge(string icon, Color backgroundColor)
+		{
+			return GetConditionIcon(icon, 64, backgroundColor);
+		}
+
+		static Image GetConditionIcon(string icon, int size, Color backgroundColor)
 		{
 			var name = GetImageResourceName(icon, size);
 			var image = Image.LoadFromResource(name);
@@ -91,5 +101,7 @@ namespace CoatCheck
 					return "cloudy";
 			};
 		}
+
+		
 	}
 }

@@ -8,7 +8,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Timers;
 using Meadow.Foundation.Sensors.Motion;
-using Meadow.Gateways.Bluetooth;
 
 namespace CoatCheck
 {
@@ -21,8 +20,6 @@ namespace CoatCheck
 		DisplayController _displayController;
 		IWiFiNetworkAdapter _wifi;
 		bool _isClockSet;
-
-		PushButton _button;
 
 		Timer _weatherUpdateTimer;
 		Timer _sleepTimer;
@@ -180,7 +177,7 @@ namespace CoatCheck
 			var data = StationData.Parse(responseBody);
 
 			LogInfo("Updating display...");
-			_displayController.Update(new WeatherViewModel(data));
+			_displayController.Update(data);
 
 			LogInfo("Weather info updated.");
 		}
