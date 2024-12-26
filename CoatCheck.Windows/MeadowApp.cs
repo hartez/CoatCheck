@@ -39,11 +39,6 @@ namespace CoatCheck.Windows
 		{
 			if (_display is System.Windows.Forms.Form display)
 			{
-				// Force the display resolution to match the St7789
-				// plus a little extra to account for https://github.com/WildernessLabs/Meadow_Issues/issues/564
-				display.Width = 256;
-				display.Height = 279;
-
 				System.Windows.Forms.Application.Run(display);
 			}
 		}
